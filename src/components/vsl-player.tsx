@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { ArrowRight } from 'lucide-react';
 
 declare global {
@@ -19,18 +20,22 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const playerRef = useRef<any>(null);
   const playerApiReady = useRef(false);
   const [showButton, setShowButton] = useState(false);
+  const [progress, setProgress] = useState(0);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const checkTime = () => {
-      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
+        const duration = playerRef.current.getDuration();
+
+        if (duration > 0) {
+          setProgress((currentTime / duration) * 100);
+        }
+
         // 10 seconds
         if (currentTime >= 10) {
           setShowButton(true);
-          if (timeCheckInterval.current) {
-            clearInterval(timeCheckInterval.current);
-          }
         }
       }
     };
@@ -40,7 +45,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
-        timeCheckInterval.current = setInterval(checkTime, 1000);
+        timeCheckInterval.current = setInterval(checkTime, 250);
       } else {
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
@@ -104,6 +109,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         <div id="youtube-player" className="w-full h-full"></div>
         <div className="absolute inset-0 w-full h-full"></div>
       </div>
+      <Progress value={progress} className="w-full h-2" />
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
           <Button size="lg" className="w-full text-xl font-bold py-8 animate-pulse">
