@@ -79,7 +79,7 @@ export default function VslPlayer({ videoId, checkoutUrl }: VslPlayerProps) {
       
       timeCheckIntervalRef.current = setInterval(() => {
         const currentTime = playerRef.current?.getCurrentTime();
-        if (currentTime >= 30) {
+        if (currentTime >= 170) {
           setShowButton(true);
           if (timeCheckIntervalRef.current) {
             clearInterval(timeCheckIntervalRef.current);
