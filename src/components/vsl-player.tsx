@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -13,13 +11,10 @@ declare global {
 
 type VslPlayerProps = {
   videoId: string;
-  checkoutUrl: string;
 };
 
-export default function VslPlayer({ videoId, checkoutUrl }: VslPlayerProps) {
-  const [showButton, setShowButton] = useState(false);
+export default function VslPlayer({ videoId }: VslPlayerProps) {
   const playerRef = useRef<any>(null);
-  const timeCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const playerApiReady = useRef(false);
 
   useEffect(() => {
@@ -52,9 +47,6 @@ export default function VslPlayer({ videoId, checkoutUrl }: VslPlayerProps) {
           iv_load_policy: 3,
           disablekb: 1,
         },
-        events: {
-          'onStateChange': onPlayerStateChange,
-        },
       });
     };
 
@@ -62,60 +54,16 @@ export default function VslPlayer({ videoId, checkoutUrl }: VslPlayerProps) {
     loadYouTubeAPI();
 
     return () => {
-      if (timeCheckIntervalRef.current) {
-        clearInterval(timeCheckIntervalRef.current);
-      }
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         playerRef.current.destroy();
       }
     };
   }, [videoId]);
 
-  const onPlayerStateChange = (event: any) => {
-    if (event.data === window.YT.PlayerState.PLAYING) {
-      if (timeCheckIntervalRef.current) {
-        clearInterval(timeCheckIntervalRef.current);
-      }
-      
-      timeCheckIntervalRef.current = setInterval(() => {
-        const currentTime = playerRef.current?.getCurrentTime();
-        if (currentTime >= 170) {
-          setShowButton(true);
-          if (timeCheckIntervalRef.current) {
-            clearInterval(timeCheckIntervalRef.current);
-          }
-        }
-      }, 1000);
-    } else {
-      if (timeCheckIntervalRef.current) {
-        clearInterval(timeCheckIntervalRef.current);
-      }
-    }
-  };
-
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto">
       <div className="aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20">
         <div id="youtube-player" className="w-full h-full"></div>
-      </div>
-      
-      <div className="h-20 flex items-center justify-center">
-        <div className={cn(
-            'transition-all duration-500 ease-in-out',
-            showButton ? 'opacity-100 visible' : 'opacity-0 invisible'
-          )}>
-            <Button asChild size="lg" className="w-full md:w-auto text-lg md:text-xl font-bold py-8 px-10 hover:scale-105 transition-transform duration-300 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]">
-              <a
-                href={checkoutUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-hidden={!showButton}
-                tabIndex={showButton ? 0 : -1}
-              >
-                Quero Acessar o Indicador Agora
-              </a>
-            </Button>
-        </div>
       </div>
     </div>
   );
