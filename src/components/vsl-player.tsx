@@ -100,8 +100,9 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      <div className="aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20">
+      <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20">
         <div id="youtube-player" className="w-full h-full"></div>
+        <div className="absolute inset-0 w-full h-full"></div>
       </div>
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
