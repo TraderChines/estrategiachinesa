@@ -102,7 +102,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         <div id="youtube-player" className="w-full h-full"></div>
       </div>
       {showButton && (
-        <a href="https://checkout.perfectpay.com.br/pay/PPU38CNK7D7" className="block">
+        <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
           <Button size="lg" className="w-full text-xl font-bold py-8 animate-pulse">
             QUERO ACESSAR O INDICADOR CHINÊS
             <ArrowRight className="ml-2 h-6 w-6" />
