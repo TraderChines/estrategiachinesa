@@ -25,8 +25,8 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     const checkTime = () => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
-        // 2 minutes and 50 seconds = 170 seconds
-        if (currentTime >= 170) {
+        // 10 seconds
+        if (currentTime >= 10) {
           setShowButton(true);
           if (timeCheckInterval.current) {
             clearInterval(timeCheckInterval.current);
