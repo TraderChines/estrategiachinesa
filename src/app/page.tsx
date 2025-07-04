@@ -8,8 +8,8 @@ export default function Home() {
       </div>
       <div className="flex-grow flex items-center justify-center p-4 md:p-8 w-full">
         <div className="container mx-auto flex flex-col items-center justify-center text-center space-y-6">
-          <h1 className="text-2xl font-black tracking-tight sm:text-3xl md:text-4xl lg:text-5xl font-headline max-w-4xl">
-            Descubra como uma estratégia chinesa está transformando a vida de pessoas comuns usando apenas o celular.
+          <h1 className="text-2xl font-black tracking-tight sm:text-3xl md:text-4xl lg:text-5xl font-headline max-w-4xl uppercase">
+            Descubra como uma estratégia chinesa está transformando a vida de pessoas comuns usando <span className="text-primary">apenas o celular.</span>
           </h1>
           <VslPlayer videoId="Rrx_PoE8hKQ" />
         </div>
