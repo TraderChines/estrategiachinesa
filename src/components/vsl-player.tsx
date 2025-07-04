@@ -168,8 +168,8 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       <Progress value={progress} className="w-full h-2" />
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
-          <Button size="lg" className="w-full text-xl font-bold py-8 animate-pulse">
-            QUERO ACESSAR O INDICADOR CHINÊS
+          <Button size="lg" className="w-full text-xl font-bold py-8 animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
+            QUERO ACESSAR A ESTRATÉGIA CHINESA
             <ArrowRight className="ml-2 h-6 w-6" />
           </Button>
         </a>
