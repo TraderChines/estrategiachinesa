@@ -46,24 +46,27 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           let calculatedProgress = 0;
           const videoProgress = currentTime / duration;
 
-          // Stage 1: Fast (0% -> 20% of video time)
-          if (videoProgress <= 0.20) {
-            // This 20% of video time covers 60% of the progress bar
-            calculatedProgress = (videoProgress / 0.20) * 60;
-          } 
-          // Stage 2: Slow (20% -> 80% of video time)
-          else if (videoProgress <= 0.80) {
-            // This 60% of video time covers 20% of the progress bar (from 60% to 80%)
-            const timeInStage = videoProgress - 0.20;
-            const progressInStage = (timeInStage / 0.60) * 20;
+          // Fase 1 (Início Rápido): Primeiros 10% do tempo -> avança para 60% da barra.
+          if (videoProgress <= 0.10) {
+            calculatedProgress = (videoProgress / 0.10) * 60;
+          }
+          // Fase 2 (Meio Normal): Próximos 60% do tempo (10%-70%) -> avança de 60% a 80%.
+          else if (videoProgress <= 0.70) {
+            const timeInStage = videoProgress - 0.10;
+            const progressInStage = (timeInStage / 0.60) * 20; // 20% progress (80-60)
             calculatedProgress = 60 + progressInStage;
-          } 
-          // Stage 3: Normal (80% -> 100% of video time)
-          else {
-            // This 20% of video time covers 20% of the progress bar (from 80% to 100%)
-            const timeInStage = videoProgress - 0.80;
-            const progressInStage = (timeInStage / 0.20) * 20;
+          }
+          // Fase 3 (Rápido): Próximos 10% do tempo (70%-80%) -> avança de 80% a 90%.
+          else if (videoProgress <= 0.80) {
+            const timeInStage = videoProgress - 0.70;
+            const progressInStage = (timeInStage / 0.10) * 10; // 10% progress (90-80)
             calculatedProgress = 80 + progressInStage;
+          }
+          // Fase 4 (Final Normal): Últimos 20% do tempo (80%-100%) -> avança de 90% a 100%.
+          else {
+            const timeInStage = videoProgress - 0.80;
+            const progressInStage = (timeInStage / 0.20) * 10; // 10% progress (100-90)
+            calculatedProgress = 90 + progressInStage;
           }
     
           setProgress(Math.min(calculatedProgress, 100));
