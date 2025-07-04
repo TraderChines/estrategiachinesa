@@ -21,13 +21,14 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
     *   Posicione uma barra de progresso fina na parte inferior do player de vídeo.
     *   A cor da barra de progresso deve ser a cor primária do tema (verde).
     *   A animação da barra deve ser não linear para manter o engajamento:
-        *   **Fase 1 (Início Rápido):** Nos primeiros 20% do tempo do vídeo, a barra deve avançar rapidamente até 60% de seu comprimento total.
-        *   **Fase 2 (Meio Lento):** Nos próximos 60% do tempo do vídeo, a barra deve avançar lentamente, cobrindo os próximos 20% de seu comprimento (de 60% a 80%).
-        *   **Fase 3 (Final Normal):** Nos últimos 20% do tempo do vídeo, a barra deve avançar no ritmo normal, cobrindo os 20% restantes (de 80% a 100%).
+        *   **Fase 1 (Início Rápido):** Nos primeiros 10% do tempo do vídeo, a barra deve avançar rapidamente até 60% de seu comprimento total.
+        *   **Fase 2 (Meio Normal):** Nos próximos 60% do tempo do vídeo, a barra deve avançar em ritmo normal, cobrindo os próximos 20% de seu comprimento (de 60% a 80%).
+        *   **Fase 3 (Rápido):** Nos próximos 10% do tempo do vídeo, a barra deve avançar rapidamente, cobrindo os próximos 10% de seu comprimento (de 80% a 90%).
+        *   **Fase 4 (Final Normal):** Nos últimos 20% do tempo do vídeo, a barra deve avançar em ritmo normal, cobrindo os 10% restantes (de 90% a 100%).
 
 5.  **Botão de Checkout (Call to Action):**
     *   O botão **não** deve ser visível inicialmente.
-    *   Ele deve aparecer abaixo do vídeo após **10 segundos** de reprodução.
+    *   Ele deve aparecer abaixo do vídeo após **2 minutos e 50 segundos** de reprodução.
     *   **Estilo do Botão:**
         *   Cor de fundo: Amarelo (`bg-yellow-400`).
         *   Cor do texto: Preto.
