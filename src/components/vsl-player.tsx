@@ -46,15 +46,23 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           let calculatedProgress = 0;
           const videoProgress = currentTime / duration;
 
-          if (videoProgress <= 0.25) {
-            calculatedProgress = (videoProgress / 0.25) * 50;
-          } else if (videoProgress <= 0.75) {
-            const timeInStage = videoProgress - 0.25;
-            const progressInStage = (timeInStage / 0.50) * 30;
-            calculatedProgress = 50 + progressInStage;
-          } else {
-            const timeInStage = videoProgress - 0.75;
-            const progressInStage = (timeInStage / 0.25) * 20;
+          // Stage 1: Fast (0% -> 20% of video time)
+          if (videoProgress <= 0.20) {
+            // This 20% of video time covers 60% of the progress bar
+            calculatedProgress = (videoProgress / 0.20) * 60;
+          } 
+          // Stage 2: Slow (20% -> 80% of video time)
+          else if (videoProgress <= 0.80) {
+            // This 60% of video time covers 20% of the progress bar (from 60% to 80%)
+            const timeInStage = videoProgress - 0.20;
+            const progressInStage = (timeInStage / 0.60) * 20;
+            calculatedProgress = 60 + progressInStage;
+          } 
+          // Stage 3: Normal (80% -> 100% of video time)
+          else {
+            // This 20% of video time covers 20% of the progress bar (from 80% to 100%)
+            const timeInStage = videoProgress - 0.80;
+            const progressInStage = (timeInStage / 0.20) * 20;
             calculatedProgress = 80 + progressInStage;
           }
     
