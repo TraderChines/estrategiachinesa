@@ -28,13 +28,28 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
         const duration = playerRef.current.getDuration();
+        const buttonAppearTime = 10;
+        const initialJumpPercent = 90;
 
         if (duration > 0) {
-          setProgress((currentTime / duration) * 100);
+          let calculatedProgress = 0;
+          if (currentTime <= buttonAppearTime) {
+            calculatedProgress = (currentTime / buttonAppearTime) * initialJumpPercent;
+          } else {
+            const remainingDuration = duration - buttonAppearTime;
+            const timeAfterJump = currentTime - buttonAppearTime;
+            const remainingProgressPercent = 100 - initialJumpPercent;
+
+            if (remainingDuration > 0) {
+              calculatedProgress = initialJumpPercent + (timeAfterJump / remainingDuration) * remainingProgressPercent;
+            } else {
+              calculatedProgress = initialJumpPercent;
+            }
+          }
+          setProgress(Math.min(calculatedProgress, 100));
         }
 
-        // 10 seconds
-        if (currentTime >= 10) {
+        if (currentTime >= buttonAppearTime) {
           setShowButton(true);
         }
       }
