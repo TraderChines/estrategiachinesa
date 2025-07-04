@@ -40,7 +40,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
         const duration = playerRef.current.getDuration();
-        const buttonAppearTime = 10;
+        const buttonAppearTime = 170; // 2 minutes and 50 seconds
 
         if (duration > 0) {
           let calculatedProgress = 0;
