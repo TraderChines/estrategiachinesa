@@ -9,7 +9,7 @@ export default function Home() {
       <div className="flex-grow flex items-center justify-center p-4 md:p-8 w-full">
         <div className="container mx-auto flex flex-col items-center justify-center text-center space-y-6">
           <h1 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-6xl font-headline max-w-4xl">
-            O Indicador da Estratégia Chinesa que Está Transformando Iniciantes em Traders Lucrativos
+            Descubra como uma estratégia chinesa está transformando a vida de pessoas comuns usando apenas o celular.
           </h1>
           <VslPlayer videoId="Rrx_PoE8hKQ" />
         </div>
