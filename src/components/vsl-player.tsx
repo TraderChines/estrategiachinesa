@@ -43,36 +43,25 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         const buttonAppearTime = 10;
 
         if (duration > 0) {
-          const phase1EndTime = buttonAppearTime;
-          const phase1EndProgress = 50;
-    
-          const phase2EndTime = duration * 0.8;
-          const phase2EndProgress = 80;
-    
+          const midpointTime = duration / 2;
+          const midpointProgress = 90;
           let calculatedProgress = 0;
-    
-          if (currentTime <= phase1EndTime) {
-            const phase1Duration = phase1EndTime;
+
+          if (currentTime <= midpointTime) {
+            // Phase 1: Rapidly get to 90% progress by the time the video is halfway through.
+            const phase1Duration = midpointTime;
             if (phase1Duration > 0) {
-              calculatedProgress = (currentTime / phase1Duration) * phase1EndProgress;
-            }
-          } else if (currentTime <= phase2EndTime) {
-            const phase2Duration = phase2EndTime - phase1EndTime;
-            const timeInPhase2 = currentTime - phase1EndTime;
-            const phase2ProgressSpan = phase2EndProgress - phase1EndProgress;
-            if (phase2Duration > 0) {
-              calculatedProgress = phase1EndProgress + (timeInPhase2 / phase2Duration) * phase2ProgressSpan;
-            } else {
-              calculatedProgress = phase1EndProgress;
+                calculatedProgress = (currentTime / phase1Duration) * midpointProgress;
             }
           } else {
-            const phase3Duration = duration - phase2EndTime;
-            const timeInPhase3 = currentTime - phase2EndTime;
-            const phase3ProgressSpan = 100 - phase2EndProgress;
-            if (phase3Duration > 0) {
-              calculatedProgress = phase2EndProgress + (timeInPhase3 / phase3Duration) * phase3ProgressSpan;
+            // Phase 2: Cover the remaining 10% of progress in the second half of the video.
+            const timeInPhase2 = currentTime - midpointTime;
+            const phase2Duration = duration - midpointTime;
+            const phase2ProgressSpan = 100 - midpointProgress;
+            if (phase2Duration > 0) {
+                calculatedProgress = midpointProgress + (timeInPhase2 / phase2Duration) * phase2ProgressSpan;
             } else {
-              calculatedProgress = 100;
+                calculatedProgress = 100;
             }
           }
     
