@@ -29,23 +29,44 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         const currentTime = playerRef.current.getCurrentTime();
         const duration = playerRef.current.getDuration();
         const buttonAppearTime = 10;
-        const initialJumpPercent = 90;
 
         if (duration > 0) {
+          const phase1EndTime = buttonAppearTime;
+          const phase1EndProgress = 50;
+    
+          const phase2EndTime = duration * 0.8;
+          const phase2EndProgress = 80;
+    
           let calculatedProgress = 0;
-          if (currentTime <= buttonAppearTime) {
-            calculatedProgress = (currentTime / buttonAppearTime) * initialJumpPercent;
-          } else {
-            const remainingDuration = duration - buttonAppearTime;
-            const timeAfterJump = currentTime - buttonAppearTime;
-            const remainingProgressPercent = 100 - initialJumpPercent;
-
-            if (remainingDuration > 0) {
-              calculatedProgress = initialJumpPercent + (timeAfterJump / remainingDuration) * remainingProgressPercent;
+    
+          if (currentTime <= phase1EndTime) {
+            // Phase 1: Fast Start (0-10s -> 0-50%)
+            const phase1Duration = phase1EndTime;
+            if (phase1Duration > 0) {
+              calculatedProgress = (currentTime / phase1Duration) * phase1EndProgress;
+            }
+          } else if (currentTime <= phase2EndTime) {
+            // Phase 2: Slow Middle (10s - 80% of video -> 50-80%)
+            const phase2Duration = phase2EndTime - phase1EndTime;
+            const timeInPhase2 = currentTime - phase1EndTime;
+            const phase2ProgressSpan = phase2EndProgress - phase1EndProgress;
+            if (phase2Duration > 0) {
+              calculatedProgress = phase1EndProgress + (timeInPhase2 / phase2Duration) * phase2ProgressSpan;
             } else {
-              calculatedProgress = initialJumpPercent;
+              calculatedProgress = phase1EndProgress;
+            }
+          } else {
+            // Phase 3: Normal End (80% of video - end -> 80-100%)
+            const phase3Duration = duration - phase2EndTime;
+            const timeInPhase3 = currentTime - phase2EndTime;
+            const phase3ProgressSpan = 100 - phase2EndProgress;
+            if (phase3Duration > 0) {
+              calculatedProgress = phase2EndProgress + (timeInPhase3 / phase3Duration) * phase3ProgressSpan;
+            } else {
+              calculatedProgress = 100;
             }
           }
+    
           setProgress(Math.min(calculatedProgress, 100));
         }
 
