@@ -3,7 +3,7 @@ import VslPlayer from '@/components/vsl-player';
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center bg-background text-foreground">
-      <div className="w-full bg-red-600 text-white p-3 text-center font-bold text-lg">
+      <div className="w-full bg-red-600 text-white p-2 md:p-3 text-center font-bold text-base md:text-lg">
         ATENÇÃO: SEU ACESSO SERÁ LIBERADO NO FINAL DO VÍDEO!
       </div>
       <div className="flex-grow flex items-center justify-center p-4 md:p-8 w-full">

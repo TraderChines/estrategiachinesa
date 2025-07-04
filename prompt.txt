@@ -41,5 +41,6 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
 *   **Tema:** Escuro. Fundo quase preto (`hsl(0 0% 5.5%)`), texto branco.
 *   **Cor Primária:** Verde (`hsl(142 72% 47%)`). Use essa cor para o destaque no título e para a barra de progresso.
 *   **Fontes:** Use a fonte 'Poppins' para todos os textos.
+*   **Responsividade:** A página deve ser totalmente responsiva, com boa aparência em dispositivos móveis e desktops.
 
 Implemente esta página em um único arquivo `src/app/page.tsx` e crie um componente separado `src/components/vsl-player.tsx` para o player de vídeo e sua lógica customizada.

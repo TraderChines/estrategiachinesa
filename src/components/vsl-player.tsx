@@ -153,7 +153,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         >
           {!isPlaying && (
             <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
-              <Play className="text-white h-12 w-12 fill-white" />
+              <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
             </div>
           )}
         </div>
@@ -161,9 +161,9 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       </div>
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
-          <Button size="lg" className="w-full text-xl font-bold py-8 animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
+          <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
             QUERO ACESSAR A ESTRATÉGIA CHINESA
-            <ArrowRight className="ml-2 h-6 w-6" />
+            <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
           </Button>
         </a>
       )}
