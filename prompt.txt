@@ -1,4 +1,4 @@
-Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Tailwind CSS e ShadCN. A página deve ter um tema escuro.
+Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Tailwind CSS e ShadCN. A página deve ter um tema escuro e ser totalmente responsiva.
 
 **Estrutura e Conteúdo:**
 
@@ -20,11 +20,11 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
 4.  **Barra de Progresso Customizada:**
     *   Posicione uma barra de progresso fina na parte inferior do player de vídeo.
     *   A cor da barra de progresso deve ser a cor primária do tema (verde).
-    *   A animação da barra deve ser não linear para manter o engajamento:
-        *   **Fase 1 (Início Rápido):** Nos primeiros 10% do tempo do vídeo, a barra deve avançar rapidamente até 60% de seu comprimento total.
-        *   **Fase 2 (Meio Normal):** Nos próximos 60% do tempo do vídeo, a barra deve avançar em ritmo normal, cobrindo os próximos 20% de seu comprimento (de 60% a 80%).
-        *   **Fase 3 (Rápido):** Nos próximos 10% do tempo do vídeo, a barra deve avançar rapidamente, cobrindo os próximos 10% de seu comprimento (de 80% a 90%).
-        *   **Fase 4 (Final Normal):** Nos últimos 20% do tempo do vídeo, a barra deve avançar em ritmo normal, cobrindo os 10% restantes (de 90% a 100%).
+    *   A animação da barra deve ser não linear para manter o engajamento, seguindo estas fases baseadas no tempo do vídeo:
+        *   **Fase 1 (0% a 10% do tempo):** A barra avança rapidamente até 60% de seu comprimento.
+        *   **Fase 2 (10% a 70% do tempo):** A barra avança lentamente de 60% a 80% de seu comprimento.
+        *   **Fase 3 (70% a 80% do tempo):** A barra avança em ritmo normal de 80% a 90% de seu comprimento.
+        *   **Fase 4 (80% a 100% do tempo):** A barra avança lentamente de 90% a 100% de seu comprimento.
 
 5.  **Botão de Checkout (Call to Action):**
     *   O botão **não** deve ser visível inicialmente.
@@ -43,4 +43,7 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
 *   **Fontes:** Use a fonte 'Poppins' para todos os textos.
 *   **Responsividade:** A página deve ser totalmente responsiva, com boa aparência em dispositivos móveis e desktops.
 
-Implemente esta página em um único arquivo `src/app/page.tsx` e crie um componente separado `src/components/vsl-player.tsx` para o player de vídeo e sua lógica customizada.
+**Estrutura de Arquivos Sugerida:**
+
+*   Implemente a página principal em `src/app/page.tsx`.
+*   Crie um componente separado `src/components/vsl-player.tsx` para o player de vídeo e toda a sua lógica customizada (play/pause, barra de progresso, aparecimento do botão).
