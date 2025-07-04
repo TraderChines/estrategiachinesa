@@ -46,20 +46,17 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           let calculatedProgress = 0;
           const videoProgress = currentTime / duration;
 
-          if (videoProgress <= 0.40) {
-            calculatedProgress = (videoProgress / 0.40) * 60;
+          if (videoProgress <= 0.25) {
+            calculatedProgress = (videoProgress / 0.25) * 33.33;
           } else if (videoProgress <= 0.50) {
-            const timeInStage = videoProgress - 0.40;
-            const stageDuration = 0.10;
-            calculatedProgress = 60 + (timeInStage / stageDuration) * 5;
-          } else if (videoProgress <= 0.85) {
+            const timeInStage = videoProgress - 0.25;
+            calculatedProgress = 33.33 + (timeInStage / 0.25) * 16.67;
+          } else if (videoProgress <= 0.75) {
             const timeInStage = videoProgress - 0.50;
-            const stageDuration = 0.35;
-            calculatedProgress = 65 + (timeInStage / stageDuration) * 30;
+            calculatedProgress = 50 + (timeInStage / 0.25) * 33.33;
           } else {
-            const timeInStage = videoProgress - 0.85;
-            const stageDuration = 0.15;
-            calculatedProgress = 95 + (timeInStage / stageDuration) * 5;
+            const timeInStage = videoProgress - 0.75;
+            calculatedProgress = 83.33 + (timeInStage / 0.25) * 16.67;
           }
     
           setProgress(Math.min(calculatedProgress, 100));
@@ -150,8 +147,8 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
             </div>
           )}
         </div>
+        <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none" />
       </div>
-      <Progress value={progress} className="w-full h-2" />
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
           <Button size="lg" className="w-full text-xl font-bold py-8 animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
