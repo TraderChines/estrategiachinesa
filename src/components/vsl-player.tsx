@@ -43,26 +43,23 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         const buttonAppearTime = 10;
 
         if (duration > 0) {
-          const midpointTime = duration / 2;
-          const midpointProgress = 90;
           let calculatedProgress = 0;
+          const videoProgress = currentTime / duration;
 
-          if (currentTime <= midpointTime) {
-            // Phase 1: Rapidly get to 90% progress by the time the video is halfway through.
-            const phase1Duration = midpointTime;
-            if (phase1Duration > 0) {
-                calculatedProgress = (currentTime / phase1Duration) * midpointProgress;
-            }
+          if (videoProgress <= 0.40) {
+            calculatedProgress = (videoProgress / 0.40) * 60;
+          } else if (videoProgress <= 0.50) {
+            const timeInStage = videoProgress - 0.40;
+            const stageDuration = 0.10;
+            calculatedProgress = 60 + (timeInStage / stageDuration) * 5;
+          } else if (videoProgress <= 0.85) {
+            const timeInStage = videoProgress - 0.50;
+            const stageDuration = 0.35;
+            calculatedProgress = 65 + (timeInStage / stageDuration) * 30;
           } else {
-            // Phase 2: Cover the remaining 10% of progress in the second half of the video.
-            const timeInPhase2 = currentTime - midpointTime;
-            const phase2Duration = duration - midpointTime;
-            const phase2ProgressSpan = 100 - midpointProgress;
-            if (phase2Duration > 0) {
-                calculatedProgress = midpointProgress + (timeInPhase2 / phase2Duration) * phase2ProgressSpan;
-            } else {
-                calculatedProgress = 100;
-            }
+            const timeInStage = videoProgress - 0.85;
+            const stageDuration = 0.15;
+            calculatedProgress = 95 + (timeInStage / stageDuration) * 5;
           }
     
           setProgress(Math.min(calculatedProgress, 100));
