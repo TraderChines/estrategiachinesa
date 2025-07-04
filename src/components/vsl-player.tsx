@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Play } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -21,7 +21,19 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const playerApiReady = useRef(false);
   const [showButton, setShowButton] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTogglePlay = () => {
+    if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
+      const playerState = playerRef.current.getPlayerState();
+      if (playerState === window.YT.PlayerState.PLAYING) {
+        playerRef.current.pauseVideo();
+      } else {
+        playerRef.current.playVideo();
+      }
+    }
+  };
 
   useEffect(() => {
     const checkTime = () => {
@@ -40,13 +52,11 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           let calculatedProgress = 0;
     
           if (currentTime <= phase1EndTime) {
-            // Phase 1: Fast Start (0-10s -> 0-50%)
             const phase1Duration = phase1EndTime;
             if (phase1Duration > 0) {
               calculatedProgress = (currentTime / phase1Duration) * phase1EndProgress;
             }
           } else if (currentTime <= phase2EndTime) {
-            // Phase 2: Slow Middle (10s - 80% of video -> 50-80%)
             const phase2Duration = phase2EndTime - phase1EndTime;
             const timeInPhase2 = currentTime - phase1EndTime;
             const phase2ProgressSpan = phase2EndProgress - phase1EndProgress;
@@ -56,7 +66,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
               calculatedProgress = phase1EndProgress;
             }
           } else {
-            // Phase 3: Normal End (80% of video - end -> 80-100%)
             const phase3Duration = duration - phase2EndTime;
             const timeInPhase3 = currentTime - phase2EndTime;
             const phase3ProgressSpan = 100 - phase2EndProgress;
@@ -78,11 +87,13 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
 
     const onPlayerStateChange = (event: any) => {
       if (event.data === window.YT.PlayerState.PLAYING) {
+        setIsPlaying(true);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
         timeCheckInterval.current = setInterval(checkTime, 250);
       } else {
+        setIsPlaying(false);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
@@ -143,7 +154,16 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20">
         <div id="youtube-player" className="w-full h-full"></div>
-        <div className="absolute inset-0 w-full h-full"></div>
+        <div 
+          className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
+          onClick={handleTogglePlay}
+        >
+          {!isPlaying && (
+            <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
+              <Play className="text-white h-12 w-12 fill-white" />
+            </div>
+          )}
+        </div>
       </div>
       <Progress value={progress} className="w-full h-2" />
       {showButton && (
