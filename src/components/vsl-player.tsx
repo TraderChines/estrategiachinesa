@@ -47,16 +47,15 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           const videoProgress = currentTime / duration;
 
           if (videoProgress <= 0.25) {
-            calculatedProgress = (videoProgress / 0.25) * 33.33;
-          } else if (videoProgress <= 0.50) {
-            const timeInStage = videoProgress - 0.25;
-            calculatedProgress = 33.33 + (timeInStage / 0.25) * 16.67;
+            calculatedProgress = (videoProgress / 0.25) * 50;
           } else if (videoProgress <= 0.75) {
-            const timeInStage = videoProgress - 0.50;
-            calculatedProgress = 50 + (timeInStage / 0.25) * 33.33;
+            const timeInStage = videoProgress - 0.25;
+            const progressInStage = (timeInStage / 0.50) * 30;
+            calculatedProgress = 50 + progressInStage;
           } else {
             const timeInStage = videoProgress - 0.75;
-            calculatedProgress = 83.33 + (timeInStage / 0.25) * 16.67;
+            const progressInStage = (timeInStage / 0.25) * 20;
+            calculatedProgress = 80 + progressInStage;
           }
     
           setProgress(Math.min(calculatedProgress, 100));
