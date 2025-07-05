@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight, Play, Undo2 } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -33,6 +32,14 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       } else {
         playerRef.current.playVideo();
       }
+    }
+  };
+
+  const handleRewind = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click from toggling play/pause
+    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+      const currentTime = playerRef.current.getCurrentTime();
+      playerRef.current.seekTo(Math.max(0, currentTime - 10), true);
     }
   };
 
@@ -93,7 +100,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         }
       } else if (event.data === window.YT.PlayerState.ENDED) {
         setIsPlaying(false);
-        setProgress(100);
+        setProgress(0);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
@@ -166,7 +173,19 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
             </div>
           )}
         </div>
-        <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none" />
+        
+        {isPlaying && (
+          <Button
+            onClick={handleRewind}
+            variant="ghost"
+            size="icon"
+            className="absolute bottom-4 left-4 text-white bg-black/30 hover:bg-black/50 h-10 w-10 p-2 z-10"
+          >
+            <Undo2 className="h-6 w-6" />
+          </Button>
+        )}
+
+        <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none z-0" />
       </div>
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block px-4 md:px-0">
