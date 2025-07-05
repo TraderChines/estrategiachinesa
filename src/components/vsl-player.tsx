@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
@@ -100,7 +101,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     };
     
     const onPlayerReady = (event: any) => {
-        event.target.playVideo();
+        // We don't want to autoplay, so we do nothing here.
     };
 
     const onYouTubeIframeAPIReady = () => {
@@ -112,7 +113,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         width: '100%',
         videoId: videoId,
         playerVars: {
-          autoplay: 1,
+          autoplay: 0,
           controls: 0,
           rel: 0,
           showinfo: 0,
