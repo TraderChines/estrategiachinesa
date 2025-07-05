@@ -16,7 +16,6 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
     *   O vídeo deve tocar automaticamente (`autoplay: 1`) e em loop (`loop: 1`).
     *   **Remova todos os controles padrão do YouTube** (`controls: 0`, `showinfo: 0`, etc.).
     *   Implemente a funcionalidade de play/pause ao clicar em qualquer lugar na área do vídeo. Quando pausado, um ícone de "Play" deve aparecer no centro.
-    *   Adicione uma imagem de thumbnail que aparece antes do vídeo começar e depois que ele termina. A imagem deve ser `https://i.ibb.co/C0bSpsf/THUMB-VSL-1.png`. Ao clicar na thumbnail, o vídeo começa.
 
 4.  **Barra de Progresso Customizada:**
     *   Posicione uma barra de progresso fina na parte inferior do player de vídeo.

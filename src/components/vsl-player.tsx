@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, Play } from 'lucide-react';
-import Image from 'next/image';
 
 declare global {
   interface Window {
@@ -22,21 +21,8 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const playerApiReady = useRef(false);
   const [showButton, setShowButton] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false); 
-  const [showThumbnail, setShowThumbnail] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
-
-  const handlePlayClick = () => {
-    if (showThumbnail) {
-      setShowThumbnail(false);
-      // If the player is ready, play it. Otherwise, onPlayerReady will handle it.
-      if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
-        playerRef.current.playVideo();
-      }
-    } else {
-      handleTogglePlay();
-    }
-  };
 
   const handleTogglePlay = () => {
     if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
@@ -95,7 +81,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     const onPlayerStateChange = (event: any) => {
       if (event.data === window.YT.PlayerState.PLAYING) {
         setIsPlaying(true);
-        setShowThumbnail(false);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
@@ -107,7 +92,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         }
       } else if (event.data === window.YT.PlayerState.ENDED) {
         setIsPlaying(false);
-        setShowThumbnail(true);
         setProgress(100);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
@@ -116,10 +100,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     };
     
     const onPlayerReady = (event: any) => {
-        // Don't autoplay if the thumbnail is shown. Wait for user click.
-        if (!showThumbnail) {
-            event.target.playVideo();
-        }
+        event.target.playVideo();
     };
 
     const onYouTubeIframeAPIReady = () => {
@@ -131,7 +112,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         width: '100%',
         videoId: videoId,
         playerVars: {
-          autoplay: showThumbnail ? 0 : 1, // Don't autoplay if thumbnail is visible
+          autoplay: 1,
           controls: 0,
           rel: 0,
           showinfo: 0,
@@ -161,57 +142,30 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     };
 
     window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
-    if (!showThumbnail) {
-        loadYouTubeAPI();
-    } else if (window.YT && window.YT.Player) {
-        // API is ready, but we didn't create the player yet.
-        onYouTubeIframeAPIReady();
-    }
-
+    loadYouTubeAPI();
 
     return () => {
       if (timeCheckInterval.current) {
         clearInterval(timeCheckInterval.current);
       }
-      // Don't destroy the player, just the interval.
-      // If we destroy it, it disappears.
     };
-  }, [videoId, showThumbnail]);
+  }, [videoId]);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 md:p-0 p-4" onClick={handlePlayClick}>
-        {showThumbnail && (
-           <div className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group">
-             <Image
-                src="https://i.ibb.co/C0bSpsf/THUMB-VSL-1.png"
-                alt="Video Thumbnail"
-                layout="fill"
-                objectFit="cover"
-                unoptimized
-             />
-             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-300"></div>
-             <div className="relative bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:scale-110">
-               <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
-             </div>
-           </div>
-        )}
+      <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 md:p-0 p-4">
         <div id="youtube-player" className="w-full h-full"></div>
-        {!showThumbnail && (
-          <>
-            <div 
-              className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
-              onClick={handleTogglePlay}
-            >
-              {!isPlaying && (
-                <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
-                  <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
-                </div>
-              )}
+        <div 
+          className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
+          onClick={handleTogglePlay}
+        >
+          {!isPlaying && (
+            <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
+              <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
             </div>
-            <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none" />
-          </>
-        )}
+          )}
+        </div>
+        <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none" />
       </div>
       {showButton && (
         <a href="https://pay.kiwify.com.br/N2HRXHr" className="block px-4 md:px-0">
