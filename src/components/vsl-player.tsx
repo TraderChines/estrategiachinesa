@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, Play } from 'lucide-react';
+import Image from 'next/image';
 
 declare global {
   interface Window {
@@ -21,8 +22,21 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const playerApiReady = useRef(false);
   const [showButton, setShowButton] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false); 
+  const [showThumbnail, setShowThumbnail] = useState(true);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const handlePlayClick = () => {
+    if (showThumbnail) {
+      setShowThumbnail(false);
+      // If the player is ready, play it. Otherwise, onPlayerReady will handle it.
+      if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+        playerRef.current.playVideo();
+      }
+    } else {
+      handleTogglePlay();
+    }
+  };
 
   const handleTogglePlay = () => {
     if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
@@ -40,30 +54,30 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
         const duration = playerRef.current.getDuration();
-        const buttonAppearTime = 170; // 2 minutes and 50 seconds
+        const buttonAppearTime = 180; // 3 minutes
 
         if (duration > 0) {
           let calculatedProgress = 0;
           const videoProgress = currentTime / duration;
-
-          // Fase 1 (Início Rápido): Primeiros 10% do tempo -> avança para 60% da barra.
+          
+          // Fase 1 (Início Rápido): Nos primeiros 10% do tempo do vídeo, a barra deve avançar rapidamente até 60% de seu comprimento total.
           if (videoProgress <= 0.10) {
             calculatedProgress = (videoProgress / 0.10) * 60;
           }
-          // Fase 2 (Meio Normal): Próximos 60% do tempo (10%-70%) -> avança de 60% a 80%.
-          else if (videoProgress <= 0.70) {
+          // Fase 2 (Meio Normal): Nos próximos 60% do tempo do vídeo, a barra deve avançar no ritmo normal, cobrindo os próximos 20% de seu comprimento (de 60% a 80%).
+          else if (videoProgress <= 0.70) { 
             const timeInStage = videoProgress - 0.10;
             const progressInStage = (timeInStage / 0.60) * 20; // 20% progress (80-60)
             calculatedProgress = 60 + progressInStage;
           }
-          // Fase 3 (Rápido): Próximos 10% do tempo (70%-80%) -> avança de 80% a 90%.
+          // Fase 3 (Rápido): Nos próximos 10% do tempo do vídeo, a barra deve avançar no ritmo rapido, cobrindo os 10% restantes (de 80% a 90%).
           else if (videoProgress <= 0.80) {
             const timeInStage = videoProgress - 0.70;
             const progressInStage = (timeInStage / 0.10) * 10; // 10% progress (90-80)
             calculatedProgress = 80 + progressInStage;
           }
-          // Fase 4 (Final Normal): Últimos 20% do tempo (80%-100%) -> avança de 90% a 100%.
-          else {
+          // Fase 4 (Final Normal): Nos próximos 10% do tempo do vídeo, a barra deve avançar no ritmo rapido, cobrindo os 10% restantes (de 90% a 100%).
+          else { 
             const timeInStage = videoProgress - 0.80;
             const progressInStage = (timeInStage / 0.20) * 10; // 10% progress (100-90)
             calculatedProgress = 90 + progressInStage;
@@ -81,16 +95,31 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     const onPlayerStateChange = (event: any) => {
       if (event.data === window.YT.PlayerState.PLAYING) {
         setIsPlaying(true);
+        setShowThumbnail(false);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
         timeCheckInterval.current = setInterval(checkTime, 250);
-      } else {
+      } else if (event.data === window.YT.PlayerState.PAUSED) {
         setIsPlaying(false);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
+      } else if (event.data === window.YT.PlayerState.ENDED) {
+        setIsPlaying(false);
+        setShowThumbnail(true);
+        setProgress(100);
+        if (timeCheckInterval.current) {
+          clearInterval(timeCheckInterval.current);
+        }
       }
+    };
+    
+    const onPlayerReady = (event: any) => {
+        // Don't autoplay if the thumbnail is shown. Wait for user click.
+        if (!showThumbnail) {
+            event.target.playVideo();
+        }
     };
 
     const onYouTubeIframeAPIReady = () => {
@@ -102,7 +131,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         width: '100%',
         videoId: videoId,
         playerVars: {
-          autoplay: 1,
+          autoplay: showThumbnail ? 0 : 1, // Don't autoplay if thumbnail is visible
           controls: 0,
           rel: 0,
           showinfo: 0,
@@ -114,6 +143,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           playlist: videoId
         },
         events: {
+          'onReady': onPlayerReady,
           'onStateChange': onPlayerStateChange
         }
       });
@@ -131,36 +161,60 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     };
 
     window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
-    loadYouTubeAPI();
+    if (!showThumbnail) {
+        loadYouTubeAPI();
+    } else if (window.YT && window.YT.Player) {
+        // API is ready, but we didn't create the player yet.
+        onYouTubeIframeAPIReady();
+    }
+
 
     return () => {
       if (timeCheckInterval.current) {
         clearInterval(timeCheckInterval.current);
       }
-      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        playerRef.current.destroy();
-      }
+      // Don't destroy the player, just the interval.
+      // If we destroy it, it disappears.
     };
-  }, [videoId]);
+  }, [videoId, showThumbnail]);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20">
+      <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 md:p-0 p-4" onClick={handlePlayClick}>
+        {showThumbnail && (
+           <div className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group">
+             <Image
+                src="https://i.ibb.co/C0bSpsf/THUMB-VSL-1.png"
+                alt="Video Thumbnail"
+                layout="fill"
+                objectFit="cover"
+                unoptimized
+             />
+             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-300"></div>
+             <div className="relative bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:scale-110">
+               <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
+             </div>
+           </div>
+        )}
         <div id="youtube-player" className="w-full h-full"></div>
-        <div 
-          className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
-          onClick={handleTogglePlay}
-        >
-          {!isPlaying && (
-            <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
-              <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
+        {!showThumbnail && (
+          <>
+            <div 
+              className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
+              onClick={handleTogglePlay}
+            >
+              {!isPlaying && (
+                <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
+                  <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none" />
+            <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none" />
+          </>
+        )}
       </div>
       {showButton && (
-        <a href="https://pay.kiwify.com.br/N2HRXHr" className="block">
+        <a href="https://pay.kiwify.com.br/N2HRXHr" className="block px-4 md:px-0">
           <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
             QUERO ACESSAR A ESTRATÉGIA CHINESA
             <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />

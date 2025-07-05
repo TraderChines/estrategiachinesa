@@ -29,7 +29,7 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
 
 5.  **Botão de Checkout (Call to Action):**
     *   O botão **não** deve ser visível inicialmente.
-    *   Ele deve aparecer abaixo do vídeo após **2 minutos e 50 segundos** de reprodução.
+    *   Ele deve aparecer abaixo do vídeo após **3 minutos** de reprodução.
     *   **Estilo do Botão:**
         *   Cor de fundo: Amarelo (`bg-yellow-400`).
         *   Cor do texto: Preto.
