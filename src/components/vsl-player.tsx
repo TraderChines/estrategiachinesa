@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
@@ -27,6 +28,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [licensasCount, setLicensasCount] = useState(11);
+  const [isCounterRed, setIsCounterRed] = useState(false);
 
   useEffect(() => {
     // State 1: Final state, count is 9.
@@ -34,6 +36,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       setVideoEnded(true);
       setShowButton(true);
       setLicensasCount(9);
+      setIsCounterRed(true);
       return; // Stop here, don't load player.
     }
 
@@ -42,6 +45,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       setVideoEnded(true);
       setShowButton(true);
       setLicensasCount(10); // Show 10
+      setIsCounterRed(true);
       const timer = setTimeout(() => { // After 30s, show 9 and save it.
         setLicensasCount(9);
         localStorage.setItem('vsl_licensasCount', '9');
@@ -102,7 +106,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   };
 
   useEffect(() => {
-    // If video has already ended (from state restore), don't load the player.
     if (videoEnded) return;
 
     const buttonAppearTime = 167; // 2 minutes and 47 seconds
@@ -168,14 +171,14 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         }
         exitFullScreen();
 
-        // When video ends for the FIRST time
         localStorage.setItem('vsl_videoEnded', 'true');
         localStorage.removeItem('vsl_currentTime');
 
-        // Start counter animation
         setLicensasCount(11);
+        setIsCounterRed(false);
         setTimeout(() => {
           setLicensasCount(10);
+          setIsCounterRed(true);
         }, 12000);
       }
     };
@@ -184,6 +187,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       const savedTime = parseFloat(localStorage.getItem('vsl_currentTime') || '0');
       if (savedTime > 0) {
         event.target.seekTo(savedTime, true);
+        event.target.playVideo();
       }
     };
 
@@ -231,31 +235,20 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       if (timeCheckInterval.current) {
         clearInterval(timeCheckInterval.current);
       }
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        playerRef.current.destroy();
+      }
       window.onYouTubeIframeAPIReady = () => {};
     };
-  }, [videoEnded, videoId]);
-
-  const shouldAnimateButton = videoEnded && showButton;
+  }, [videoId]);
 
   return (
-    <div className={`w-full max-w-4xl mx-auto flex flex-col items-center justify-center transition-all duration-1000 ease-in-out ${shouldAnimateButton ? 'min-h-[50vh] md:min-h-[70vh]' : 'space-y-6'}`}>
-      {shouldAnimateButton && (
-        <div className="text-center mb-6 animate-in fade-in duration-1000">
-          <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Restam</p>
-          <p className={cn(
-              "text-6xl md:text-8xl font-black my-1 transition-all duration-300",
-              licensasCount === 11 ? "text-primary" : "text-red-500 [text-shadow:0_0_8px_rgba(239,68,68,0.7)]"
-            )}>
-              {licensasCount}
-          </p>
-          <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Licenças</p>
-        </div>
-      )}
-      <div
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center space-y-6">
+      <div 
         ref={playerContainerRef}
         className={cn(
-          "relative w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-500 ease-in-out",
-          videoEnded ? 'opacity-0 !w-0 !h-0 absolute -z-10' : 'opacity-100 aspect-video'
+          "relative w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 aspect-video transition-all duration-500 ease-in-out",
+          videoEnded && "opacity-0 invisible h-0"
         )}
       >
         <div id="youtube-player" className="w-full h-full"></div>
@@ -263,8 +256,8 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           className={cn("absolute inset-0 w-full h-full flex items-center justify-center group", videoEnded ? 'cursor-not-allowed' : 'cursor-pointer')}
           onClick={handleTogglePlay}
         >
-          {(!isPlaying || videoEnded) && (
-            <div className={`bg-black/50 p-4 rounded-full transition-all duration-300 ${!videoEnded && 'group-hover:bg-black/70'}`}>
+          {(!isPlaying && !videoEnded) && (
+            <div className={`bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70`}>
               <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
             </div>
           )}
@@ -285,20 +278,36 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       </div>
       
       <div className={cn(
-          "w-full transition-all duration-1000 ease-in-out",
-          shouldAnimateButton ? "max-w-md" : "max-w-full",
-          !showButton && "opacity-0 invisible"
+          "w-full flex flex-col items-center space-y-4 transition-all duration-1000 ease-in-out",
+          !showButton && "opacity-0 invisible h-0",
+          showButton && videoEnded && "mt-[-25%]"
         )}>
-          <a 
-            href="https://pay.kiwify.com.br/N2HRXHr" 
-            className="block"
-          >
-            <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
-              QUERO ACESSAR A ESTRATÉGIA CHINESA
-              <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
-            </Button>
-          </a>
+          {videoEnded && (
+            <div className="text-center animate-in fade-in duration-1000">
+              <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Restam</p>
+              <p className={cn(
+                  "text-6xl md:text-8xl font-black my-1 transition-all duration-300",
+                  isCounterRed ? "text-red-500 [text-shadow:0_0_8px_rgba(239,68,68,0.7)]" : "text-primary"
+                )}>
+                  {licensasCount}
+              </p>
+              <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Licenças</p>
+            </div>
+          )}
+          <div className="w-full max-w-md">
+            <a 
+              href="https://pay.kiwify.com.br/N2HRXHr" 
+              className="block"
+            >
+              <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
+                QUERO ACESSAR A ESTRATÉGIA CHINESA
+                <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
+              </Button>
+            </a>
+          </div>
         </div>
     </div>
   );
 }
+
+    
