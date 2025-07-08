@@ -191,11 +191,19 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       if (timeCheckInterval.current) {
         clearInterval(timeCheckInterval.current);
       }
+      window.onYouTubeIframeAPIReady = () => {};
     };
   }, [videoId, showButton, videoEnded]);
 
   return (
-    <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 ease-in-out ${videoEnded ? 'flex items-center justify-center aspect-video' : 'space-y-6'}`}>
+    <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 ease-in-out ${videoEnded ? 'flex flex-col items-center justify-center aspect-video' : 'space-y-6'}`}>
+      {videoEnded && (
+        <div className="text-center mb-6 animate-in fade-in duration-1000">
+          <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Restam</p>
+          <p className="text-6xl md:text-8xl font-black text-primary my-1">17</p>
+          <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Licenças</p>
+        </div>
+      )}
       <div
         ref={playerContainerRef}
         className={`relative w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-500 ease-in-out ${videoEnded ? 'opacity-0 !w-0 !h-0 absolute -z-10' : 'opacity-100 aspect-video'}`}
@@ -226,15 +234,17 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none z-0" />
       </div>
       {showButton && (
-        <a 
-          href="https://pay.kiwify.com.br/N2HRXHr" 
-          className={`block transition-all duration-1000 ease-in-out ${videoEnded ? 'w-full max-w-md px-4 md:px-0' : 'w-full px-4 md:px-0'}`}
-        >
-          <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
-            QUERO ACESSAR A ESTRATÉGIA CHINESA
-            <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
-          </Button>
-        </a>
+        <div className={`transition-all duration-1000 ease-in-out ${videoEnded ? 'w-full max-w-md' : 'w-full px-4 md:px-0'}`}>
+          <a 
+            href="https://pay.kiwify.com.br/N2HRXHr" 
+            className="block"
+          >
+            <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
+              QUERO ACESSAR A ESTRATÉGIA CHINESA
+              <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
+            </Button>
+          </a>
+        </div>
       )}
     </div>
   );
