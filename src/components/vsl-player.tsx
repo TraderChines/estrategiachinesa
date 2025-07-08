@@ -22,21 +22,55 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const [showButton, setShowButton] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  const enterFullScreen = () => {
+    const playerElement = playerContainerRef.current;
+    if (playerElement) {
+      if (playerElement.requestFullscreen) {
+        playerElement.requestFullscreen();
+      } else if ((playerElement as any).mozRequestFullScreen) {
+        (playerElement as any).mozRequestFullScreen();
+      } else if ((playerElement as any).webkitRequestFullscreen) {
+        (playerElement as any).webkitRequestFullscreen();
+      } else if ((playerElement as any).msRequestFullscreen) {
+        (playerElement as any).msRequestFullscreen();
+      }
+    }
+  };
+
+  const exitFullScreen = () => {
+    if (document.fullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).mozCancelFullScreen) {
+        (document as any).mozCancelFullScreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+      }
+    }
+  };
 
   const handleTogglePlay = () => {
+    if (videoEnded) return;
+
     if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
       const playerState = playerRef.current.getPlayerState();
       if (playerState === window.YT.PlayerState.PLAYING) {
         playerRef.current.pauseVideo();
       } else {
         playerRef.current.playVideo();
+        enterFullScreen();
       }
     }
   };
 
   const handleRewind = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from toggling play/pause
+    e.stopPropagation();
     if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
       const currentTime = playerRef.current.getCurrentTime();
       playerRef.current.seekTo(Math.max(0, currentTime - 10), true);
@@ -44,44 +78,43 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   };
 
   useEffect(() => {
+    const buttonAppearTime = 167; // 2 minutes and 47 seconds
+    const exitFullScreenTime = 9; // 9 seconds
+    
     const checkTime = () => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
         const duration = playerRef.current.getDuration();
-        const buttonAppearTime = 180; // 3 minutes
-
+        
         if (duration > 0) {
           let calculatedProgress = 0;
           const videoProgress = currentTime / duration;
           
-          // Fase 1 (Início Rápido): Nos primeiros 10% do tempo do vídeo, a barra deve avançar rapidamente até 60% de seu comprimento total.
           if (videoProgress <= 0.10) {
             calculatedProgress = (videoProgress / 0.10) * 60;
-          }
-          // Fase 2 (Meio Normal): Nos próximos 60% do tempo do vídeo, a barra deve avançar no ritmo normal, cobrindo os próximos 20% de seu comprimento (de 60% a 80%).
-          else if (videoProgress <= 0.70) { 
+          } else if (videoProgress <= 0.70) { 
             const timeInStage = videoProgress - 0.10;
-            const progressInStage = (timeInStage / 0.60) * 20; // 20% progress (80-60)
+            const progressInStage = (timeInStage / 0.60) * 20;
             calculatedProgress = 60 + progressInStage;
-          }
-          // Fase 3 (Rápido): Nos próximos 10% do tempo do vídeo, a barra deve avançar no ritmo rapido, cobrindo os 10% restantes (de 80% a 90%).
-          else if (videoProgress <= 0.80) {
+          } else if (videoProgress <= 0.80) {
             const timeInStage = videoProgress - 0.70;
-            const progressInStage = (timeInStage / 0.10) * 10; // 10% progress (90-80)
+            const progressInStage = (timeInStage / 0.10) * 10;
             calculatedProgress = 80 + progressInStage;
-          }
-          // Fase 4 (Final Normal): Nos próximos 10% do tempo do vídeo, a barra deve avançar no ritmo rapido, cobrindo os 10% restantes (de 90% a 100%).
-          else { 
+          } else { 
             const timeInStage = videoProgress - 0.80;
-            const progressInStage = (timeInStage / 0.20) * 10; // 10% progress (100-90)
+            const progressInStage = (timeInStage / 0.20) * 10;
             calculatedProgress = 90 + progressInStage;
           }
     
           setProgress(Math.min(calculatedProgress, 100));
         }
 
-        if (currentTime >= buttonAppearTime) {
+        if (!showButton && currentTime >= buttonAppearTime) {
           setShowButton(true);
+        }
+
+        if (currentTime >= exitFullScreenTime) {
+          exitFullScreen();
         }
       }
     };
@@ -101,14 +134,17 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       } else if (event.data === window.YT.PlayerState.ENDED) {
         setIsPlaying(false);
         setProgress(0);
+        setVideoEnded(true);
+        setShowButton(true);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
+        exitFullScreen();
       }
     };
     
     const onPlayerReady = (event: any) => {
-        // We don't want to autoplay, so we do nothing here.
+      // Player is ready
     };
 
     const onYouTubeIframeAPIReady = () => {
@@ -128,8 +164,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           fs: 0,
           iv_load_policy: 3,
           disablekb: 1,
-          loop: 1,
-          playlist: videoId
+          loop: 0,
         },
         events: {
           'onReady': onPlayerReady,
@@ -157,24 +192,24 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         clearInterval(timeCheckInterval.current);
       }
     };
-  }, [videoId]);
+  }, [videoId, showButton, videoEnded]);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 md:p-0 p-4">
+      <div ref={playerContainerRef} className="relative aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20">
         <div id="youtube-player" className="w-full h-full"></div>
         <div 
-          className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
+          className={`absolute inset-0 w-full h-full flex items-center justify-center group ${videoEnded ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           onClick={handleTogglePlay}
         >
-          {!isPlaying && (
-            <div className="bg-black/50 p-4 rounded-full transition-all duration-300 group-hover:bg-black/70">
+          {(!isPlaying || videoEnded) && (
+            <div className={`bg-black/50 p-4 rounded-full transition-all duration-300 ${!videoEnded && 'group-hover:bg-black/70'}`}>
               <Play className="text-white h-8 w-8 md:h-12 md:w-12 fill-white" />
             </div>
           )}
         </div>
         
-        {isPlaying && (
+        {isPlaying && !videoEnded && (
           <Button
             onClick={handleRewind}
             variant="ghost"
