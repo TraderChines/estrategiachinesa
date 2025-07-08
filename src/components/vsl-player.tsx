@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, Play, Undo2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 declare global {
   interface Window {
@@ -25,6 +26,17 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const [videoEnded, setVideoEnded] = useState(false);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+  const [licensasCount, setLicensasCount] = useState(11);
+
+  useEffect(() => {
+    if (videoEnded) {
+      const timer = setTimeout(() => {
+        setLicensasCount(10);
+      }, 2000); // 2 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [videoEnded]);
 
   const enterFullScreen = () => {
     const playerElement = playerContainerRef.current;
@@ -196,11 +208,16 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   }, [videoId, showButton, videoEnded]);
 
   return (
-    <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 ease-in-out ${videoEnded ? 'flex flex-col items-center justify-center aspect-video' : 'space-y-6'}`}>
+    <div className={`w-full max-w-4xl mx-auto flex flex-col items-center justify-center transition-all duration-1000 ease-in-out ${videoEnded ? 'aspect-video' : 'space-y-6'}`}>
       {videoEnded && (
         <div className="text-center mb-6 animate-in fade-in duration-1000">
           <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Restam</p>
-          <p className="text-6xl md:text-8xl font-black text-primary my-1">17</p>
+          <p className={cn(
+              "text-6xl md:text-8xl font-black my-1 transition-all duration-300",
+              licensasCount === 11 ? "text-primary" : "text-red-500 [text-shadow:0_0_8px_rgba(239,68,68,0.7)]"
+            )}>
+              {licensasCount}
+          </p>
           <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Licenças</p>
         </div>
       )}
