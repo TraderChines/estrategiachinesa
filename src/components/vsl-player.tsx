@@ -79,7 +79,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
 
   useEffect(() => {
     const buttonAppearTime = 167; // 2 minutes and 47 seconds
-    const exitFullScreenTime = 9; // 9 seconds
+    const exitFullScreenTime = 166; // 2 minutes and 46 seconds
     
     const checkTime = () => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {

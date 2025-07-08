@@ -18,7 +18,7 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
     *   Implemente a funcionalidade de play/pause ao clicar em qualquer lugar na área do vídeo. Quando pausado, um ícone de "Play" deve aparecer no centro.
     *   Crie um botão para retroceder o vídeo em 10 segundos, visível apenas durante a reprodução.
     *   Ao clicar para iniciar, o vídeo deve entrar em modo de tela cheia.
-    *   Aos 9 segundos, o vídeo deve sair da tela cheia.
+    *   O vídeo sai da tela cheia em 2:46.
     *   O vídeo não deve entrar em loop. Ao finalizar, ele deve voltar ao estado inicial e não poder ser reproduzido novamente.
 
 4.  **Barra de Progresso Customizada:**
