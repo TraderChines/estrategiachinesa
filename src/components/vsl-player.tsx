@@ -176,7 +176,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         setLicensasCount(11);
         setTimeout(() => {
           setLicensasCount(10);
-        }, 4000);
+        }, 12000);
       }
     };
     
@@ -233,7 +233,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       }
       window.onYouTubeIframeAPIReady = () => {};
     };
-  }, [videoEnded]);
+  }, [videoEnded, videoId]);
 
   const shouldAnimateButton = videoEnded && showButton;
 
