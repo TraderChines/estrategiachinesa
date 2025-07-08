@@ -29,14 +29,26 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const [licensasCount, setLicensasCount] = useState(11);
 
   useEffect(() => {
-    if (videoEnded) {
-      const timer = setTimeout(() => {
-        setLicensasCount(10);
-      }, 4000); // 4 seconds
-
-      return () => clearTimeout(timer);
+    // State 1: Final state, count is 9.
+    if (localStorage.getItem('vsl_licensasCount') === '9') {
+      setVideoEnded(true);
+      setShowButton(true);
+      setLicensasCount(9);
+      return; // Stop here, don't load player.
     }
-  }, [videoEnded]);
+
+    // State 2: Video has ended, but page was refreshed before count hit 9.
+    if (localStorage.getItem('vsl_videoEnded') === 'true') {
+      setVideoEnded(true);
+      setShowButton(true);
+      setLicensasCount(10); // Show 10
+      const timer = setTimeout(() => { // After 30s, show 9 and save it.
+        setLicensasCount(9);
+        localStorage.setItem('vsl_licensasCount', '9');
+      }, 30000);
+      return () => clearTimeout(timer); // Cleanup
+    }
+  }, []);
 
   const enterFullScreen = () => {
     const playerElement = playerContainerRef.current;
@@ -90,12 +102,16 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   };
 
   useEffect(() => {
+    // If video has already ended (from state restore), don't load the player.
+    if (videoEnded) return;
+
     const buttonAppearTime = 167; // 2 minutes and 47 seconds
     const exitFullScreenTime = 166; // 2 minutes and 46 seconds
     
     const checkTime = () => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
+        localStorage.setItem('vsl_currentTime', currentTime.toString());
         const duration = playerRef.current.getDuration();
         
         if (duration > 0) {
@@ -145,18 +161,30 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         }
       } else if (event.data === window.YT.PlayerState.ENDED) {
         setIsPlaying(false);
-        setProgress(0);
         setVideoEnded(true);
         setShowButton(true);
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
         exitFullScreen();
+
+        // When video ends for the FIRST time
+        localStorage.setItem('vsl_videoEnded', 'true');
+        localStorage.removeItem('vsl_currentTime');
+
+        // Start counter animation
+        setLicensasCount(11);
+        setTimeout(() => {
+          setLicensasCount(10);
+        }, 4000);
       }
     };
     
     const onPlayerReady = (event: any) => {
-      // Player is ready
+      const savedTime = parseFloat(localStorage.getItem('vsl_currentTime') || '0');
+      if (savedTime > 0) {
+        event.target.seekTo(savedTime, true);
+      }
     };
 
     const onYouTubeIframeAPIReady = () => {
@@ -205,11 +233,13 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       }
       window.onYouTubeIframeAPIReady = () => {};
     };
-  }, [videoId, showButton, videoEnded]);
+  }, [videoEnded]);
+
+  const shouldAnimateButton = videoEnded && showButton;
 
   return (
-    <div className={`w-full max-w-4xl mx-auto flex flex-col items-center justify-center transition-all duration-1000 ease-in-out ${videoEnded ? 'aspect-video' : 'space-y-6'}`}>
-      {videoEnded && (
+    <div className={`w-full max-w-4xl mx-auto flex flex-col items-center justify-center transition-all duration-1000 ease-in-out ${shouldAnimateButton ? 'min-h-[50vh] md:min-h-[70vh]' : 'space-y-6'}`}>
+      {shouldAnimateButton && (
         <div className="text-center mb-6 animate-in fade-in duration-1000">
           <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Restam</p>
           <p className={cn(
@@ -223,11 +253,14 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       )}
       <div
         ref={playerContainerRef}
-        className={`relative w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-500 ease-in-out ${videoEnded ? 'opacity-0 !w-0 !h-0 absolute -z-10' : 'opacity-100 aspect-video'}`}
+        className={cn(
+          "relative w-full bg-black rounded-lg overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-500 ease-in-out",
+          videoEnded ? 'opacity-0 !w-0 !h-0 absolute -z-10' : 'opacity-100 aspect-video'
+        )}
       >
         <div id="youtube-player" className="w-full h-full"></div>
         <div 
-          className={`absolute inset-0 w-full h-full flex items-center justify-center group ${videoEnded ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+          className={cn("absolute inset-0 w-full h-full flex items-center justify-center group", videoEnded ? 'cursor-not-allowed' : 'cursor-pointer')}
           onClick={handleTogglePlay}
         >
           {(!isPlaying || videoEnded) && (
@@ -250,8 +283,12 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
 
         <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none z-0" />
       </div>
-      {showButton && (
-        <div className={`transition-all duration-1000 ease-in-out ${videoEnded ? 'w-full max-w-md' : 'w-full px-4 md:px-0'}`}>
+      
+      <div className={cn(
+          "w-full transition-all duration-1000 ease-in-out",
+          shouldAnimateButton ? "max-w-md" : "max-w-full",
+          !showButton && "opacity-0 invisible"
+        )}>
           <a 
             href="https://pay.kiwify.com.br/N2HRXHr" 
             className="block"
@@ -262,7 +299,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
             </Button>
           </a>
         </div>
-      )}
     </div>
   );
 }
