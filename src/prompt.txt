@@ -12,10 +12,14 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
     *   A frase "APENAS O CELULAR." deve ser destacada na cor primária do tema (verde).
 
 3.  **Player de Vídeo Customizado:**
-    *   Incorpore o vídeo do YouTube: "https://www.youtube.com/embed/N0_D2waVWKM".
-    *   O vídeo deve tocar automaticamente (`autoplay: 1`) e em loop (`loop: 1`).
+    *   Incorpore o vídeo do YouTube: "https://www.youtube.com/embed/-ho4g2EGb2w".
+    *   O vídeo deve tocar apenas após o clique inicial do usuário.
     *   **Remova todos os controles padrão do YouTube** (`controls: 0`, `showinfo: 0`, etc.).
     *   Implemente a funcionalidade de play/pause ao clicar em qualquer lugar na área do vídeo. Quando pausado, um ícone de "Play" deve aparecer no centro.
+    *   Crie um botão para retroceder o vídeo em 10 segundos, visível apenas durante a reprodução.
+    *   Ao clicar para iniciar, o vídeo deve entrar em modo de tela cheia.
+    *   Aos 9 segundos, o vídeo deve sair da tela cheia.
+    *   O vídeo não deve entrar em loop. Ao finalizar, ele deve voltar ao estado inicial e não poder ser reproduzido novamente.
 
 4.  **Barra de Progresso Customizada:**
     *   Posicione uma barra de progresso fina na parte inferior do player de vídeo.
@@ -28,7 +32,7 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
 
 5.  **Botão de Checkout (Call to Action):**
     *   O botão **não** deve ser visível inicialmente.
-    *   Ele deve aparecer abaixo do vídeo após **3 minutos** de reprodução.
+    *   Ele deve aparecer abaixo do vídeo após **10 segundos** de reprodução.
     *   **Estilo do Botão:**
         *   Cor de fundo: Amarelo (`bg-yellow-400`).
         *   Cor do texto: Preto.
