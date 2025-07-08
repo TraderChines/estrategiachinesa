@@ -32,7 +32,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     if (videoEnded) {
       const timer = setTimeout(() => {
         setLicensasCount(10);
-      }, 2000); // 2 seconds
+      }, 4000); // 4 seconds
 
       return () => clearTimeout(timer);
     }
