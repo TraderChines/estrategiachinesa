@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, Play, Undo2 } from 'lucide-react';
+import { Play, Undo2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 declare global {
@@ -301,7 +301,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
             >
               <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
                 QUERO ACESSAR A ESTRATÉGIA CHINESA
-                <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
               </Button>
             </a>
           </div>
@@ -309,5 +308,3 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     </div>
   );
 }
-
-    
