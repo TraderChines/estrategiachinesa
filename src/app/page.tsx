@@ -11,7 +11,7 @@ export default function Home() {
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl md:text-4xl lg:text-5xl font-headline max-w-4xl uppercase">
             Descubra como uma estratégia chinesa está transformando a vida de pessoas comuns usando <span className="text-primary">apenas o celular.</span>
           </h1>
-          <VslPlayer videoId="ljicWxEcqgE" />
+          <VslPlayer videoId="ewlGNXdH7oM" />
         </div>
       </div>
     </main>

@@ -12,7 +12,7 @@ Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Ta
     *   A frase "APENAS O CELULAR." deve ser destacada na cor primária do tema (verde).
 
 3.  **Player de Vídeo Customizado:**
-    *   Incorpore um vídeo do YouTube com o ID "N0_D2waVWKM".
+    *   Incorpore um vídeo do YouTube com o ID "ewlGNXdH7oM".
     *   O vídeo deve tocar automaticamente (`autoplay: 1`) e em loop (`loop: 1`).
     *   **Remova todos os controles padrão do YouTube** (`controls: 0`, `showinfo: 0`, etc.).
     *   Implemente a funcionalidade de play/pause ao clicar em qualquer lugar na área do vídeo. Quando pausado, um ícone de "Play" deve aparecer no centro.
