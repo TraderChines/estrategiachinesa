@@ -1,0 +1,49 @@
+Crie uma página de Vendas em Vídeo (VSL) de alta conversão usando Next.js, Tailwind CSS e ShadCN. A página deve ter um tema escuro e ser totalmente responsiva.
+
+**Estrutura e Conteúdo:**
+
+1.  **Cabeçalho Fixo:**
+    *   Um banner vermelho (`bg-red-600`) no topo da página.
+    *   Texto em branco, negrito e centralizado: "ATENÇÃO: SEU ACESSO SERÁ LIBERADO NO FINAL DO VÍDEO!"
+
+2.  **Título Principal:**
+    *   Centralizado abaixo do cabeçalho.
+    *   Texto em letras maiúsculas: "DESCUBRA COMO UMA ESTRATÉGIA CHINESA ESTÁ TRANSFORMANDO A VIDA DE PESSOAS COMUNS USANDO APENAS O CELULAR."
+    *   A frase "APENAS O CELULAR." deve ser destacada na cor primária do tema (verde).
+
+3.  **Player de Vídeo Customizado:**
+    *   Incorpore um vídeo do YouTube com o ID "ewlGNXdH7oM".
+    *   O vídeo deve tocar automaticamente (`autoplay: 1`) e em loop (`loop: 1`).
+    *   **Remova todos os controles padrão do YouTube** (`controls: 0`, `showinfo: 0`, etc.).
+    *   Implemente a funcionalidade de play/pause ao clicar em qualquer lugar na área do vídeo. Quando pausado, um ícone de "Play" deve aparecer no centro.
+
+4.  **Barra de Progresso Customizada:**
+    *   Posicione uma barra de progresso fina na parte inferior do player de vídeo.
+    *   A cor da barra de progresso deve ser a cor primária do tema (verde).
+    *   A animação da barra deve ser não linear para manter o engajamento, seguindo estas fases baseadas no tempo do vídeo:
+        *   **Fase 1 (0% a 10% do tempo):** A barra avança rapidamente até 60% de seu comprimento.
+        *   **Fase 2 (10% a 70% do tempo):** A barra avança lentamente de 60% a 80% de seu comprimento.
+        *   **Fase 3 (70% a 80% do tempo):** A barra avança em ritmo normal de 80% a 90% de seu comprimento.
+        *   **Fase 4 (80% a 100% do tempo):** A barra avança lentamente de 90% a 100% de seu comprimento.
+
+5.  **Botão de Checkout (Call to Action):**
+    *   O botão **não** deve ser visível inicialmente.
+    *   Ele deve aparecer abaixo do vídeo após **3 minutos** de reprodução.
+    *   **Estilo do Botão:**
+        *   Cor de fundo: Amarelo (`bg-yellow-400`).
+        *   Cor do texto: Preto.
+        *   Texto: "QUERO ACESSAR A ESTRATÉGIA CHINESA", seguido por um ícone de seta para a direita.
+        *   Deve ter uma animação de pulso (`animate-pulse`) para chamar a atenção.
+    *   **Ação:** O botão deve ser um link para a URL de checkout: `https://pay.kiwify.com.br/N2HRXHr`.
+
+**Estilo Geral e Tema:**
+
+*   **Tema:** Escuro. Fundo quase preto (`hsl(0 0% 5.5%)`), texto branco.
+*   **Cor Primária:** Verde (`hsl(142 72% 47%)`). Use essa cor para o destaque no título e para a barra de progresso.
+*   **Fontes:** Use a fonte 'Poppins' para todos os textos.
+*   **Responsividade:** A página deve ser totalmente responsiva, com boa aparência em dispositivos móveis e desktops.
+
+**Estrutura de Arquivos Sugerida:**
+
+*   Implemente a página principal em `src/app/page.tsx`.
+*   Crie um componente separado `src/components/vsl-player.tsx` para o player de vídeo e toda a sua lógica customizada (play/pause, barra de progresso, aparecimento do botão).
