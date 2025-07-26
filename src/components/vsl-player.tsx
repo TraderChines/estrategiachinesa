@@ -1,11 +1,13 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Undo2 } from 'lucide-react';
+import { ArrowRight, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 declare global {
   interface Window {
@@ -13,6 +15,14 @@ declare global {
     YT: any;
   }
 }
+
+const VSL_COOKIE_KEY = 'vsl_video_end_timestamp';
+const COOKIE_DURATION_DAYS = 7;
+
+const FAKE_BUYER_NAMES = [
+  'Lucas', 'Ana', 'Bruno', 'Carla', 'Daniel', 'Eduarda', 'Felipe', 'Gabriela',
+  'Heitor', 'Isabela', 'João', 'Larissa', 'Marcos', 'Natália', 'Otávio', 'Patrícia'
+];
 
 type VslPlayerProps = {
   videoId: string;
@@ -27,61 +37,78 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
   const [videoEnded, setVideoEnded] = useState(false);
   const timeCheckInterval = useRef<NodeJS.Timeout | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
-  const [licensasCount, setLicensasCount] = useState(11);
-  const [isCounterRed, setIsCounterRed] = useState(false);
+  const [licenses, setLicenses] = useState<number | null>(null);
+  const { toast } = useToast();
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+
+  const licenseSchedule = [
+    { time: 20 * 1000, count: 9 }, // 20 segundos
+    { time: 30 * 1000, count: 8 }, // 30 segundos
+    { time: 60 * 60 * 1000, count: 7 }, // 1 hora
+    { time: 6 * 60 * 60 * 1000, count: 6 }, // 6 horas
+    { time: 12 * 60 * 60 * 1000, count: 5 }, // 12 horas
+    { time: 24 * 60 * 60 * 1000, count: 4 }, // 1 dia
+    { time: 2 * 24 * 60 * 60 * 1000, count: 3 }, // 2 dias
+    { time: 6 * 24 * 60 * 60 * 1000, count: 2 }, // 6 dias
+  ];
+
+  const showSocialProof = useCallback(() => {
+    const randomName = FAKE_BUYER_NAMES[Math.floor(Math.random() * FAKE_BUYER_NAMES.length)];
+    toast({
+      description: `${randomName} acabou de garantir o acesso à Estratégia Chinesa!`,
+      duration: 5000,
+    });
+  }, [toast]);
+
+  const updateLicenses = useCallback((endTime: number) => {
+    const now = Date.now();
+    const elapsedTime = now - endTime;
+
+    let currentLicenses = 10;
+    for (const schedule of licenseSchedule) {
+      if (elapsedTime >= schedule.time) {
+        currentLicenses = schedule.count;
+      } else {
+        break;
+      }
+    }
+    setLicenses(currentLicenses);
+    
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+
+    let lastCount = 10;
+    licenseSchedule.forEach(schedule => {
+      if (now < endTime + schedule.time) {
+        const timeout = setTimeout(() => {
+          setLicenses(schedule.count);
+          if (schedule.count < lastCount) {
+             showSocialProof();
+          }
+          lastCount = schedule.count;
+        }, (endTime + schedule.time) - now);
+        timeoutsRef.current.push(timeout);
+      }
+    });
+  }, [licenseSchedule, showSocialProof]);
+
 
   useEffect(() => {
-    // State 1: Final state, count is 9.
-    if (localStorage.getItem('vsl_licensasCount') === '9') {
-      setVideoEnded(true);
-      setShowButton(true);
-      setLicensasCount(9);
-      setIsCounterRed(true);
-      return; // Stop here, don't load player.
-    }
+    const cookieValue = localStorage.getItem(VSL_COOKIE_KEY);
+    if (cookieValue) {
+      const { timestamp } = JSON.parse(cookieValue);
+      const now = Date.now();
 
-    // State 2: Video has ended, but page was refreshed before count hit 9.
-    if (localStorage.getItem('vsl_videoEnded') === 'true') {
-      setVideoEnded(true);
-      setShowButton(true);
-      setLicensasCount(10); // Show 10
-      setIsCounterRed(true);
-      const timer = setTimeout(() => { // After 30s, show 9 and save it.
-        setLicensasCount(9);
-        localStorage.setItem('vsl_licensasCount', '9');
-      }, 30000);
-      return () => clearTimeout(timer); // Cleanup
-    }
-  }, []);
-
-  const enterFullScreen = () => {
-    const playerElement = playerContainerRef.current;
-    if (playerElement) {
-      if (playerElement.requestFullscreen) {
-        playerElement.requestFullscreen();
-      } else if ((playerElement as any).mozRequestFullScreen) {
-        (playerElement as any).mozRequestFullScreen();
-      } else if ((playerElement as any).webkitRequestFullscreen) {
-        (playerElement as any).webkitRequestFullscreen();
-      } else if ((playerElement as any).msRequestFullscreen) {
-        (playerElement as any).msRequestFullscreen();
+      if (now - timestamp > COOKIE_DURATION_DAYS * 24 * 60 * 60 * 1000) {
+        localStorage.removeItem(VSL_COOKIE_KEY);
+      } else {
+        setVideoEnded(true);
+        setShowButton(true);
+        updateLicenses(timestamp);
       }
     }
-  };
-
-  const exitFullScreen = () => {
-    if (document.fullscreenElement) {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if ((document as any).mozCancelFullScreen) {
-        (document as any).mozCancelFullScreen();
-      } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen();
-      } else if ((document as any).msExitFullscreen) {
-        (document as any).msExitFullscreen();
-      }
-    }
-  };
+  }, [updateLicenses]);
 
   const handleTogglePlay = () => {
     if (videoEnded) return;
@@ -92,29 +119,16 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         playerRef.current.pauseVideo();
       } else {
         playerRef.current.playVideo();
-        enterFullScreen();
       }
     }
   };
 
-  const handleRewind = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
-      const currentTime = playerRef.current.getCurrentTime();
-      playerRef.current.seekTo(Math.max(0, currentTime - 10), true);
-    }
-  };
-
   useEffect(() => {
-    if (videoEnded) return;
-
     const buttonAppearTime = 167; // 2 minutes and 47 seconds
-    const exitFullScreenTime = 166; // 2 minutes and 46 seconds
-    
+
     const checkTime = () => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
-        localStorage.setItem('vsl_currentTime', currentTime.toString());
         const duration = playerRef.current.getDuration();
         
         if (duration > 0) {
@@ -143,10 +157,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         if (!showButton && currentTime >= buttonAppearTime) {
           setShowButton(true);
         }
-
-        if (currentTime >= exitFullScreenTime) {
-          exitFullScreen();
-        }
       }
     };
 
@@ -169,30 +179,20 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         if (timeCheckInterval.current) {
           clearInterval(timeCheckInterval.current);
         }
-        exitFullScreen();
 
-        localStorage.setItem('vsl_videoEnded', 'true');
-        localStorage.removeItem('vsl_currentTime');
-
-        setLicensasCount(11);
-        setIsCounterRed(false);
-        setTimeout(() => {
-          setLicensasCount(10);
-          setIsCounterRed(true);
-        }, 12000);
+        const endTime = Date.now();
+        const cookieData = JSON.stringify({ timestamp: endTime });
+        localStorage.setItem(VSL_COOKIE_KEY, cookieData);
+        updateLicenses(endTime);
       }
     };
     
     const onPlayerReady = (event: any) => {
-      const savedTime = parseFloat(localStorage.getItem('vsl_currentTime') || '0');
-      if (savedTime > 0) {
-        event.target.seekTo(savedTime, true);
         event.target.playVideo();
-      }
     };
 
     const onYouTubeIframeAPIReady = () => {
-      if (playerApiReady.current) return;
+      if (playerApiReady.current || videoEnded) return;
       playerApiReady.current = true;
       
       playerRef.current = new window.YT.Player('youtube-player', {
@@ -200,7 +200,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         width: '100%',
         videoId: videoId,
         playerVars: {
-          autoplay: 0,
+          autoplay: 1,
           controls: 0,
           rel: 0,
           showinfo: 0,
@@ -218,6 +218,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     };
     
     const loadYouTubeAPI = () => {
+      if (videoEnded) return;
       if (!window.YT) {
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -235,12 +236,13 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
       if (timeCheckInterval.current) {
         clearInterval(timeCheckInterval.current);
       }
+      timeoutsRef.current.forEach(clearTimeout);
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         playerRef.current.destroy();
       }
       window.onYouTubeIframeAPIReady = () => {};
     };
-  }, [videoId]);
+  }, [videoId, videoEnded, updateLicenses]);
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center space-y-6">
@@ -263,16 +265,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           )}
         </div>
         
-        {isPlaying && !videoEnded && (
-          <Button
-            onClick={handleRewind}
-            variant="ghost"
-            size="icon"
-            className="absolute bottom-4 left-4 text-white bg-black/30 hover:bg-black/50 h-10 w-10 p-2 z-10"
-          >
-            <Undo2 className="h-6 w-6" />
-          </Button>
-        )}
 
         <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none z-0" />
       </div>
@@ -282,14 +274,14 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           !showButton && "opacity-0 invisible h-0",
           showButton && videoEnded && "mt-[-25%]"
         )}>
-          {videoEnded && (
+          {videoEnded && licenses !== null && (
             <div className="text-center animate-in fade-in duration-1000">
               <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Restam</p>
               <p className={cn(
                   "text-6xl md:text-8xl font-black my-1 transition-all duration-300",
-                  isCounterRed ? "text-red-500 [text-shadow:0_0_8px_rgba(239,68,68,0.7)]" : "text-primary"
+                   "text-red-500 [text-shadow:0_0_8px_rgba(239,68,68,0.7)]"
                 )}>
-                  {licensasCount}
+                  {licenses}
               </p>
               <p className="text-2xl md:text-3xl font-bold tracking-wide uppercase">Licenças</p>
             </div>
@@ -301,6 +293,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
             >
               <Button size="lg" className="w-full text-lg md:text-xl font-bold py-4 md:py-6 h-auto animate-pulse bg-yellow-400 hover:bg-yellow-500 text-black">
                 QUERO ACESSAR A ESTRATÉGIA CHINESA
+                <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
               </Button>
             </a>
           </div>
@@ -308,3 +301,5 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     </div>
   );
 }
+
+    
