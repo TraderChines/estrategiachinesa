@@ -18,6 +18,44 @@ type VslPlayerProps = {
   videoId: string;
 };
 
+const setCookie = (key: string, value: string, days: number) => {
+  if (typeof window === 'undefined') return;
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  const item = {
+    value: value,
+    expiry: expires.toUTCString(),
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+};
+
+const getCookie = (key: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  const itemStr = localStorage.getItem(key);
+  if (!itemStr) {
+    return null;
+  }
+  try {
+    const item = JSON.parse(itemStr);
+    const now = new Date();
+    if (now.getTime() > new Date(item.expiry).getTime()) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return item.value;
+  } catch (error) {
+    // If parsing fails, it might be an old non-JSON value.
+    // In this case, we can remove it and return null.
+    localStorage.removeItem(key);
+    return null;
+  }
+};
+
+const removeCookie = (key: string) => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(key);
+}
+
 export default function VslPlayer({ videoId }: VslPlayerProps) {
   const playerRef = useRef<any>(null);
   const playerApiReady = useRef(false);
@@ -32,7 +70,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
 
   useEffect(() => {
     // State 1: Final state, count is 9.
-    if (localStorage.getItem('vsl_licensasCount') === '9') {
+    if (getCookie('vsl_licensasCount') === '9') {
       setVideoEnded(true);
       setShowButton(true);
       setLicensasCount(9);
@@ -41,14 +79,14 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     }
 
     // State 2: Video has ended, but page was refreshed before count hit 9.
-    if (localStorage.getItem('vsl_videoEnded') === 'true') {
+    if (getCookie('vsl_videoEnded') === 'true') {
       setVideoEnded(true);
       setShowButton(true);
       setLicensasCount(10); // Show 10
       setIsCounterRed(true);
       const timer = setTimeout(() => { // After 30s, show 9 and save it.
         setLicensasCount(9);
-        localStorage.setItem('vsl_licensasCount', '9');
+        setCookie('vsl_licensasCount', '9', 7);
       }, 30000);
       return () => clearTimeout(timer); // Cleanup
     }
@@ -114,7 +152,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     const checkTime = () => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
         const currentTime = playerRef.current.getCurrentTime();
-        localStorage.setItem('vsl_currentTime', currentTime.toString());
+        setCookie('vsl_currentTime', currentTime.toString(), 7);
         const duration = playerRef.current.getDuration();
         
         if (duration > 0) {
@@ -171,8 +209,8 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         }
         exitFullScreen();
 
-        localStorage.setItem('vsl_videoEnded', 'true');
-        localStorage.removeItem('vsl_currentTime');
+        setCookie('vsl_videoEnded', 'true', 7);
+        removeCookie('vsl_currentTime');
 
         setLicensasCount(11);
         setIsCounterRed(false);
@@ -184,7 +222,7 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     };
     
     const onPlayerReady = (event: any) => {
-      const savedTime = parseFloat(localStorage.getItem('vsl_currentTime') || '0');
+      const savedTime = parseFloat(getCookie('vsl_currentTime') || '0');
       if (savedTime > 0) {
         event.target.seekTo(savedTime, true);
         event.target.playVideo();
@@ -308,3 +346,5 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
     </div>
   );
 }
+
+    
