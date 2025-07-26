@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Undo2 } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 declare global {
@@ -94,14 +94,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
         playerRef.current.playVideo();
         enterFullScreen();
       }
-    }
-  };
-
-  const handleRewind = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
-      const currentTime = playerRef.current.getCurrentTime();
-      playerRef.current.seekTo(Math.max(0, currentTime - 10), true);
     }
   };
 
@@ -263,17 +255,6 @@ export default function VslPlayer({ videoId }: VslPlayerProps) {
           )}
         </div>
         
-        {isPlaying && !videoEnded && (
-          <Button
-            onClick={handleRewind}
-            variant="ghost"
-            size="icon"
-            className="absolute bottom-4 left-4 text-white bg-black/30 hover:bg-black/50 h-10 w-10 p-2 z-10"
-          >
-            <Undo2 className="h-6 w-6" />
-          </Button>
-        )}
-
         <Progress value={progress} className="absolute bottom-0 w-full h-2 rounded-none z-0" />
       </div>
       
