@@ -19,7 +19,7 @@ export default function Home() {
         <h1 className="text-2xl font-bold uppercase tracking-tight md:text-4xl lg:text-5xl">
           Descubra o gatilho mais
           <br />
-          <span className="text-primary">certeiro do mercado</span>
+          <span className="text-primary">assertivo do mercado</span>
         </h1>
 
         <div className="mt-8 w-full max-w-4xl">
