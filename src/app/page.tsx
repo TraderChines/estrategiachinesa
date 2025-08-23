@@ -1,6 +1,12 @@
+
+'use client';
+
+import { useState } from 'react';
 import VslPlayer from '@/components/vsl-player';
 
 export default function Home() {
+  const [videoEnded, setVideoEnded] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col items-center">
       <header className="fixed top-0 left-0 right-0 z-10 w-full bg-red-600 p-2 text-center">
@@ -17,7 +23,7 @@ export default function Home() {
         </h1>
 
         <div className="mt-8 w-full max-w-4xl">
-          <VslPlayer />
+          <VslPlayer onVideoEnd={() => setVideoEnded(true)} />
         </div>
       </main>
     </div>

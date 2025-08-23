@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -31,7 +32,7 @@ const calculateNonLinearProgress = (currentTime: number, duration: number): numb
     return Math.min(100, 90 + ((videoPercentage - 80) / 20) * 10);
 };
 
-export default function VslPlayer() {
+export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
   const playerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [playerReady, setPlayerReady] = useState(false);
@@ -46,6 +47,7 @@ export default function VslPlayer() {
 
     const setupCounter = () => {
       setVideoEnded(true);
+      onVideoEnd();
       setShowCta(true);
       const endTime = parseInt(localStorage.getItem('vsl_videoEndTime') || '0', 10);
       const now = Date.now();
@@ -157,7 +159,7 @@ export default function VslPlayer() {
     return () => {
         stopProgressInterval();
     };
-  }, []);
+  }, [onVideoEnd]);
 
   const togglePlay = () => {
     if (!playerRef.current || !playerReady || videoEnded) return;
@@ -168,33 +170,46 @@ export default function VslPlayer() {
     }
   };
 
+  if (videoEnded && counter) {
+    return (
+        <div className="w-full">
+            <div className="flex flex-col items-center justify-center text-center p-4 animate-pulse">
+                <p className="text-xl md:text-2xl font-bold uppercase text-white">Faltam apenas</p>
+                <div className={cn("text-7xl md:text-8xl font-bold my-2", counter.color)}>{counter.value}</div>
+                <p className="text-xl md:text-2xl font-bold uppercase text-white">Licenças</p>
+            </div>
+            {showCta && (
+              <div className="mt-8">
+                  <a href="https://pay.kiwify.com.br/N2HRXHr" target="_blank" rel="noopener noreferrer" className="block">
+                    <button 
+                      className="w-full max-w-md mx-auto animate-pulse rounded-lg bg-yellow-400 px-6 py-4 text-lg font-bold text-black shadow-lg transition hover:scale-105 sm:px-8 sm:text-xl md:text-2xl"
+                    >
+                        QUERO ACESSAR AGORA
+                    </button>
+                  </a>
+              </div>
+            )}
+        </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="relative aspect-video w-full max-w-4xl mx-auto overflow-hidden rounded-lg shadow-2xl bg-black">
-        {videoEnded && counter ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-              <p className="text-xl md:text-2xl font-bold uppercase text-white">Faltam apenas</p>
-              <div className={cn("text-7xl md:text-8xl font-bold my-2", counter.color)}>{counter.value}</div>
-              <p className="text-xl md:text-2xl font-bold uppercase text-white">Licenças</p>
-          </div>
-        ) : (
-          <>
-            <div id="youtube-player" className="w-full h-full" />
-            <div
-              className="absolute inset-0 z-10 cursor-pointer"
-              onClick={togglePlay}
-            >
-              {!isPlaying && playerReady && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
-                  <Play className="h-16 w-16 text-white drop-shadow-lg md:h-20 md:w-20" fill="white" />
-                </div>
-              )}
+        <div id="youtube-player" className="w-full h-full" />
+        <div
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={togglePlay}
+        >
+          {!isPlaying && playerReady && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
+              <Play className="h-16 w-16 text-white drop-shadow-lg md:h-20 md:w-20" fill="white" />
             </div>
-            <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gray-500/50">
-                <div className="h-full bg-primary transition-all duration-500 ease-linear" style={{ width: `${progress}%` }}></div>
-            </div>
-          </>
-        )}
+          )}
+        </div>
+        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gray-500/50">
+            <div className="h-full bg-primary transition-all duration-500 ease-linear" style={{ width: `${progress}%` }}></div>
+        </div>
       </div>
 
       {showCta && (
