@@ -172,8 +172,10 @@ export default function VslPlayer() {
     <div className="w-full">
       <div className="relative aspect-video w-full max-w-4xl mx-auto overflow-hidden rounded-lg shadow-2xl bg-black">
         {videoEnded && counter ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-              <div className={cn("text-8xl font-bold", counter.color)}>{counter.value}</div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+              <p className="text-xl md:text-2xl font-bold uppercase text-white">Faltam apenas</p>
+              <div className={cn("text-7xl md:text-8xl font-bold my-2", counter.color)}>{counter.value}</div>
+              <p className="text-xl md:text-2xl font-bold uppercase text-white">Licenças</p>
           </div>
         ) : (
           <>
