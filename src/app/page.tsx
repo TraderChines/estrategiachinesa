@@ -1,14 +1,30 @@
+
+'use client';
+
+import { useState } from 'react';
+import VslPlayer from '@/components/vsl-player';
+
 export default function Home() {
+  const [videoEnded, setVideoEnded] = useState(false);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-2xl font-bold text-blue-500 mb-4">estrategiachinesa</h1>
-      <h2 className="text-4xl font-bold mb-2">Firebase Studio</h2>
-      <p className="text-lg">
-        This is a NextJS starter in Firebase Studio.
-      </p>
-      <p className="text-lg">
-        To get started, take a look at src/app/page.tsx.
-      </p>
-    </main>
+    <div className="flex min-h-screen flex-col items-center bg-background font-body text-white">
+      <header className="fixed top-0 z-20 w-full bg-red-600 p-2 text-center">
+        <p className="text-sm font-bold text-white md:text-base">
+          ATENÇÃO: SEU ACESSO SERÁ LIBERADO NO FINAL DO VÍDEO!
+        </p>
+      </header>
+
+      <main className="flex w-full flex-1 flex-col items-center justify-center px-4 pt-16 text-center">
+        <h1 className="text-3xl font-bold uppercase md:text-4xl lg:text-5xl">
+          Descubra o gatilho mais
+          <span className="text-primary"> assertivo no daytrade</span>
+        </h1>
+        
+        <div className="mt-8 w-full max-w-4xl">
+          <VslPlayer onVideoEnd={() => setVideoEnded(true)} />
+        </div>
+      </main>
+    </div>
   );
 }
