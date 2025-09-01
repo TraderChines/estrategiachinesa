@@ -181,6 +181,7 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
     if (isMuted) {
       playerRef.current.unMute();
       setIsMuted(false);
+      playerRef.current.seekTo(0, true);
     }
     
     if (!isPlaying) {
