@@ -43,9 +43,12 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
   const [counter, setCounter] = useState<{ value: string; color: string } | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [showUnmuteButton, setShowUnmuteButton] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     const videoEndedStored = localStorage.getItem('vsl_videoEnded') === 'true';
+    const userHasInteracted = localStorage.getItem('vsl_hasInteracted') === 'true';
+    setHasInteracted(userHasInteracted);
 
     const setupCounter = () => {
       setVideoEnded(true);
@@ -105,10 +108,20 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
     const onPlayerReady = (event: any) => {
       playerRef.current = event.target;
       setPlayerReady(true);
+      
       const storedTime = parseFloat(localStorage.getItem('vsl_currentTime') || '0');
-      if (storedTime > 0 && storedTime < playerRef.current.getDuration()) {
+
+      if (userHasInteracted) {
+        setIsMuted(false);
+        playerRef.current.unMute();
+        if (storedTime > 0 && storedTime < playerRef.current.getDuration()) {
           playerRef.current.seekTo(storedTime, true);
+        }
+      } else {
+        setIsMuted(true);
+        playerRef.current.mute();
       }
+
       if (storedTime >= VSL_CTA_TIMESTAMP) {
           setShowCta(true);
       }
@@ -143,7 +156,8 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
              videoId: VIDEO_ID,
              playerVars: {
                autoplay: 1, controls: 0, showinfo: 0, modestbranding: 1,
-               rel: 0, iv_load_policy: 3, fs: 0, disablekb: 1, mute: 1,
+               rel: 0, iv_load_policy: 3, fs: 0, disablekb: 1, 
+               mute: hasInteracted ? 0 : 1,
              },
              events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
            });
@@ -164,17 +178,6 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
     };
   }, [onVideoEnd]);
 
-  const toggleMute = () => {
-    if (!playerRef.current || !playerReady || videoEnded) return;
-    if (isMuted) {
-      playerRef.current.unMute();
-      setIsMuted(false);
-    } else {
-      playerRef.current.mute();
-      setIsMuted(true);
-    }
-  };
-
   const handleInitialPlay = () => {
     if (!playerRef.current || !playerReady || videoEnded) return;
     
@@ -182,6 +185,8 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
       playerRef.current.unMute();
       setIsMuted(false);
       playerRef.current.seekTo(0, true);
+      localStorage.setItem('vsl_hasInteracted', 'true');
+      setHasInteracted(true);
     }
     
     if (!isPlaying) {
@@ -217,19 +222,21 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
     <div className="w-full">
       <div className="relative aspect-video w-full max-w-4xl mx-auto overflow-hidden rounded-lg shadow-2xl bg-black">
         <div id="youtube-player" className="w-full h-full" />
-        <div
-          className="absolute inset-0 z-10 cursor-pointer"
-          onClick={handleInitialPlay}
-        >
-          {isMuted && playerReady && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
-              <div className="text-white text-center p-4 rounded-lg">
-                <p className="text-2xl font-bold mb-4">CLIQUE PARA ATIVAR O SOM</p>
-                <VolumeX className="h-16 w-16 text-white drop-shadow-lg md:h-20 md:w-20 mx-auto" fill="white" />
+        {isMuted && (
+          <div
+            className="absolute inset-0 z-10 cursor-pointer"
+            onClick={handleInitialPlay}
+          >
+            {playerReady && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
+                <div className="text-white text-center p-4 rounded-lg">
+                  <p className="text-2xl font-bold mb-4">CLIQUE PARA ATIVAR O SOM</p>
+                  <VolumeX className="h-16 w-16 text-white drop-shadow-lg md:h-20 md:w-20 mx-auto" fill="white" />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gray-500/50">
             <div className="h-full bg-primary transition-all duration-500 ease-linear" style={{ width: `${progress}%` }}></div>
         </div>
