@@ -18,6 +18,7 @@ export default function Home() {
       <main className="flex w-full flex-1 flex-col items-center justify-center px-4 pt-16 text-center">
         <h1 className="text-3xl font-bold uppercase md:text-4xl lg:text-5xl">
           Descubra o gatilho mais
+          <br />
           <span className="text-primary"> assertivo no daytrade</span>
         </h1>
         
