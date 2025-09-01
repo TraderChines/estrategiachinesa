@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Play } from 'lucide-react';
+import { Play, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Declare YT for TypeScript
@@ -41,6 +41,8 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
   const [showCta, setShowCta] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [counter, setCounter] = useState<{ value: string; color: string } | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showUnmuteButton, setShowUnmuteButton] = useState(true);
 
   useEffect(() => {
     const videoEndedStored = localStorage.getItem('vsl_videoEnded') === 'true';
@@ -110,6 +112,7 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
       if (storedTime >= VSL_CTA_TIMESTAMP) {
           setShowCta(true);
       }
+      playerRef.current.playVideo();
     };
     
     const handleVideoEnd = () => {
@@ -139,8 +142,8 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
          playerRef.current = new window.YT.Player('youtube-player', {
              videoId: VIDEO_ID,
              playerVars: {
-               autoplay: 0, controls: 0, showinfo: 0, modestbranding: 1,
-               rel: 0, iv_load_policy: 3, fs: 0, disablekb: 1,
+               autoplay: 1, controls: 0, showinfo: 0, modestbranding: 1,
+               rel: 0, iv_load_policy: 3, fs: 0, disablekb: 1, mute: 1,
              },
              events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange },
            });
@@ -161,14 +164,30 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
     };
   }, [onVideoEnd]);
 
-  const togglePlay = () => {
+  const toggleMute = () => {
     if (!playerRef.current || !playerReady || videoEnded) return;
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
+    if (isMuted) {
+      playerRef.current.unMute();
+      setIsMuted(false);
     } else {
+      playerRef.current.mute();
+      setIsMuted(true);
+    }
+  };
+
+  const handleInitialPlay = () => {
+    if (!playerRef.current || !playerReady || videoEnded) return;
+    
+    if (isMuted) {
+      playerRef.current.unMute();
+      setIsMuted(false);
+    }
+    
+    if (!isPlaying) {
       playerRef.current.playVideo();
     }
   };
+
 
   if (videoEnded && counter) {
     return (
@@ -199,11 +218,14 @@ export default function VslPlayer({ onVideoEnd }: { onVideoEnd: () => void }) {
         <div id="youtube-player" className="w-full h-full" />
         <div
           className="absolute inset-0 z-10 cursor-pointer"
-          onClick={togglePlay}
+          onClick={handleInitialPlay}
         >
-          {!isPlaying && playerReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
-              <Play className="h-16 w-16 text-white drop-shadow-lg md:h-20 md:w-20" fill="white" />
+          {isMuted && playerReady && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
+              <div className="text-white text-center p-4 rounded-lg">
+                <p className="text-2xl font-bold mb-4">CLIQUE PARA ATIVAR O SOM</p>
+                <VolumeX className="h-16 w-16 text-white drop-shadow-lg md:h-20 md:w-20 mx-auto" fill="white" />
+              </div>
             </div>
           )}
         </div>
